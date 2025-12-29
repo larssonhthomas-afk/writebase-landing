@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="icon" href="/assets/icon.png" type="image/png">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/" class="logo">
+        <img src="/assets/logo.svg" alt="WriteBase" height="40">
+      </a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="https://blog.writebase.app" target="_blank">Blog</a>
+        <a href="https://doc.writebase.app" target="_blank">Documentation</a>
+      </div>
+    </nav>
+  </header>
+  
+  <main>
+    {{ content }}
+  </main>
+  
+  <footer>
+    <p>© 2025 WriteBase</p>
+  </footer>
+</body>
+</html>
