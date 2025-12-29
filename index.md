@@ -6,7 +6,7 @@ nav_order: 0
 
 # Index
 
-WriteBase and why it is important for writers to have full controll over their process.
+WriteBase and why we writers need to have full control over their process.
 
 
 
