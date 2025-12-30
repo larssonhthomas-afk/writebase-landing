@@ -829,6 +829,14 @@
       color: var(--stone-900);
     }
 
+    .substack-embed {
+      margin-bottom: 2rem;
+    }
+
+    .substack-embed iframe {
+      max-width: 100%;
+    }
+
     /* Footer */
     footer {
       padding: 3rem 2rem;
@@ -886,7 +894,7 @@
       <div class="nav-links">
         <a href="https://blog.writebase.app">Blog</a>
         <a href="https://doc.writebase.app">Documentation</a>
-        <a href="https://blog.writebase.app" class="btn btn-primary">Join Waitlist</a>
+        <a href="#cta" class="btn btn-primary">Join Waitlist</a>
       </div>
     </div>
   </nav>
@@ -900,7 +908,7 @@
         A markdown editor connected to your Airtable database. No lock-in. No black boxes. Just writing — with full control.
       </p>
       <div class="hero-cta">
-        <a href="https://blog.writebase.app" class="btn btn-primary">
+        <a href="#cta" class="btn btn-primary">
           Join Waitlist
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -1089,12 +1097,9 @@
         I'm seeking early testers who take writing and structure seriously. Reserved access for the first cohort.
       </p>
       
-      <a href="https://blog.writebase.app" class="btn btn-primary btn-large">
-        Join Waitlist
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-      </a>
+      <div class="substack-embed">
+        <iframe src="https://writebase.substack.com/embed" width="480" height="320" style="border:1px solid #EEE; background:white; border-radius: 12px;" frameborder="0" scrolling="no"></iframe>
+      </div>
 
       <div class="cta-links">
         <a href="https://blog.writebase.app">Blog</a>
