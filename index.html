@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WriteBase — Your words. Your structure. Your data.</title>
+  <meta name="description" content="A markdown editor connected to your Airtable database. No lock-in. Full control.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="icon" type="image/png" href="icon.png">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --stone-50: #fafaf9;
+      --stone-100: #f5f5f4;
+      --stone-200: #e7e5e4;
+      --stone-300: #d6d3d1;
+      --stone-400: #a8a29e;
+      --stone-500: #78716c;
+      --stone-600: #57534e;
+      --stone-700: #44403c;
+      --stone-800: #292524;
+      --stone-900: #1c1917;
+      --amber-500: #f59e0b;
+      --amber-600: #d97706;
+      --blue-600: #2563eb;
+      --gradient-brand: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--stone-50);
+      color: var(--stone-800);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    ::selection {
+      background: rgba(245, 158, 11, 0.2);
+    }
+
+    .serif {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      background: rgba(250, 250, 249, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--stone-200);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .nav-logo img {
+      height: 36px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    .nav-links a {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--stone-400);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--stone-900);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      text-decoration: none;
+      border-radius: 100px;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--stone-900);
+      color: white;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary:hover {
+      background: var(--stone-700);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-large {
+      padding: 1.25rem 2.5rem;
+      font-size: 0.75rem;
+    }
+
+    /* Lucide icons */
+    [data-lucide] {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.5;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 12rem 2rem 6rem;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: white;
+      border: 1px solid var(--stone-200);
+      border-radius: 100px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--stone-500);
+      margin-bottom: 2rem;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .hero h1 {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      color: var(--stone-900);
+    }
+
+    .hero h1 .highlight {
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--stone-500);
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      font-weight: 400;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .hero-note {
+      font-size: 0.75rem;
+      color: var(--stone-400);
+    }
+
+    .hero-link {
+      color: var(--stone-500);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.2s;
+    }
+
+    .hero-link:hover {
+      color: var(--stone-700);
+    }
+
+    /* Showcase */
+    .showcase {
+      padding: 4rem 2rem;
+    }
+
+    .showcase-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .showcase-window {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--stone-200);
+      overflow: hidden;
+    }
+
+    .showcase-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--stone-100);
+    }
+
+    .showcase-tab {
+      flex: 1;
+      padding: 1.5rem;
+      background: none;
+      border: none;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--stone-400);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .showcase-tab:hover {
+      color: var(--stone-600);
+    }
+
+    .showcase-tab.active {
+      color: var(--stone-900);
+      border-bottom-color: var(--stone-900);
+      background: white;
+    }
+
+    .showcase-content {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      min-height: 500px;
+    }
+
+    @media (max-width: 900px) {
+      .showcase-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .showcase-image-container {
+      padding: 2rem;
+      background: var(--stone-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .showcase-image {
+      width: 100%;
+      max-width: 800px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .showcase-image.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    /* Process visualization */
+    .process-visual {
+      background: linear-gradient(180deg, #1c1917 0%, #0f0e0d 100%);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 800px;
+      display: none;
+    }
+
+    .process-visual.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .process-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #292524;
+    }
+
+    .process-intro h4 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.25rem;
+      color: #fafaf9;
+      margin-bottom: 0.5rem;
+    }
+
+    .process-intro p {
+      font-size: 0.8rem;
+      color: #78716c;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .process-example {
+      margin-top: 1rem;
+      font-style: italic;
+      color: #a8a29e !important;
+      font-size: 0.75rem !important;
+    }
+
+    .model-tags {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .model-tags span {
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.3rem 0.6rem;
+      background: #292524;
+      border: 1px solid #44403c;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      color: #a8a29e;
+    }
+
+    .model-tags span.more {
+      background: transparent;
+      border-style: dashed;
+      color: #57534e;
+    }
+
+    .pipeline-mini {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .pipeline-step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      background: #292524;
+    }
+
+    .pipeline-step.ai {
+      background: linear-gradient(90deg, rgba(79, 70, 229, 0.15) 0%, rgba(124, 58, 237, 0.1) 100%);
+      border-left: 2px solid #7c3aed;
+    }
+
+    .pipeline-step.human {
+      border-left: 2px solid #57534e;
+    }
+
+    .step-num {
+      font-size: 0.6rem;
+      color: #57534e;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .step-label {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 0.95rem;
+      color: #fafaf9;
+    }
+
+    .step-desc {
+      font-size: 0.65rem;
+      color: #78716c;
+      line-height: 1.3;
+    }
+
+    .step-tag {
+      font-size: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .pipeline-step.human .step-tag {
+      background: #44403c;
+      color: #a8a29e;
+    }
+
+    .pipeline-step.ai .step-tag {
+      background: rgba(124, 58, 237, 0.3);
+      color: #a78bfa;
+    }
+
+    .pipeline-footer {
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #292524;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .pipeline-legend {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .legend-human, .legend-ai {
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .legend-human {
+      color: #78716c;
+    }
+
+    .legend-ai {
+      color: #a78bfa;
+    }
+
+    .task-flow {
+      text-align: center;
+    }
+
+    .task-flow-label {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #57534e;
+      margin-bottom: 0.5rem;
+    }
+
+    .task-flow-steps {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .task-flow-steps span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: #a8a29e;
+      padding: 0.25rem 0.5rem;
+      background: #292524;
+      border-radius: 4px;
+    }
+
+    .task-flow-steps span.arrow {
+      background: none;
+      color: #44403c;
+      padding: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .showcase-info {
+      padding: 3rem;
+      border-left: 1px solid var(--stone-100);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .showcase-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--stone-300);
+      margin-bottom: 1rem;
+    }
+
+    .showcase-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      color: var(--stone-900);
+    }
+
+    .showcase-subtitle {
+      font-style: italic;
+      color: var(--stone-500);
+      margin-bottom: 1.5rem;
+    }
+
+    .showcase-desc {
+      font-size: 0.9rem;
+      color: var(--stone-600);
+      line-height: 1.7;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--stone-100);
+    }
+
+    .showcase-status {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--stone-400);
+    }
+
+    .showcase-status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    /* Philosophy */
+    .philosophy {
+      padding: 8rem 2rem;
+    }
+
+    .philosophy-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .philosophy-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      .philosophy-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+    }
+
+    .philosophy-item {
+      text-align: left;
+    }
+
+    .philosophy-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--stone-100);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      color: var(--stone-500);
+    }
+
+    .philosophy-item h3 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--stone-900);
+    }
+
+    .philosophy-item p {
+      font-size: 0.9rem;
+      color: var(--stone-500);
+      line-height: 1.7;
+    }
+
+    /* Quote */
+    .quote-section {
+      padding: 6rem 2rem;
+      background: var(--stone-100);
+    }
+
+    .quote-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .quote-card {
+      background: white;
+      padding: 4rem;
+      border-radius: 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quote-card::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 40px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 12rem;
+      color: var(--stone-100);
+      line-height: 1;
+    }
+
+    .quote-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2rem;
+      font-style: italic;
+      color: var(--stone-800);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .quote-body {
+      font-size: 1.1rem;
+      color: var(--stone-500);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .quote-author {
+      padding-top: 2rem;
+      border-top: 1px solid var(--stone-100);
+    }
+
+    .quote-author-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--stone-100);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+
+    .quote-author-name {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--stone-900);
+    }
+
+    .quote-author-title {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--stone-400);
+      margin-top: 0.25rem;
+    }
+
+    /* CTA */
+    .cta-section {
+      padding: 10rem 2rem;
+      background: white;
+      border-top: 1px solid var(--stone-100);
+    }
+
+    .cta-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .cta-logo {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 2.5rem;
+      opacity: 0.3;
+    }
+
+    .cta-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 3rem;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      color: var(--stone-900);
+    }
+
+    .cta-subtitle {
+      color: var(--stone-500);
+      margin-bottom: 3rem;
+    }
+
+    .cta-form {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .cta-input {
+      width: 100%;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--stone-200);
+      border-radius: 100px;
+      font-size: 1rem;
+      font-family: inherit;
+      text-align: center;
+      background: var(--stone-50);
+      transition: all 0.2s;
+      margin-bottom: 1rem;
+    }
+
+    .cta-input:focus {
+      outline: none;
+      border-color: var(--stone-900);
+      background: white;
+    }
+
+    .cta-input::placeholder {
+      color: var(--stone-400);
+    }
+
+    .cta-form .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .cta-success {
+      padding: 3rem;
+      background: var(--stone-50);
+      border-radius: 24px;
+      display: none;
+    }
+
+    .cta-success.show {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .cta-success p {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.5rem;
+      font-style: italic;
+      color: var(--stone-700);
+    }
+
+    .cta-links {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--stone-100);
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+    }
+
+    .cta-links a {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--stone-300);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .cta-links a:hover {
+      color: var(--stone-900);
+    }
+
+    /* Footer */
+    footer {
+      padding: 3rem 2rem;
+      text-align: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--stone-300);
+    }
+
+    /* Mobile nav */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      
+      .hero {
+        padding: 10rem 1.5rem 4rem;
+      }
+      
+      .showcase-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .showcase-info {
+        border-left: none;
+        border-top: 1px solid var(--stone-100);
+      }
+      
+      .quote-card {
+        padding: 2.5rem;
+      }
+      
+      .quote-text {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* SVG Icons inline */
+    .icon {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <img src="logo.png" alt="WriteBase">
+      </a>
+      <div class="nav-links">
+        <a href="https://blog.writebase.app">Blog</a>
+        <a href="https://doc.writebase.app">Documentation</a>
+        <a href="https://blog.writebase.app" class="btn btn-primary">Join Waitlist</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">Waitlist Open</div>
+      <h1>Your words. Your process.<br><span class="highlight">Your data.</span></h1>
+      <p class="hero-subtitle">
+        A markdown editor connected to your Airtable database. No lock-in. No black boxes. Just writing — with full control.
+      </p>
+      <div class="hero-cta">
+        <a href="https://blog.writebase.app" class="btn btn-primary">
+          Join Waitlist
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+        <span class="hero-note">By signing up to <a href="https://blog.writebase.app" class="hero-link">WriteBase - Substack</a> *</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showcase -->
+  <section class="showcase" id="showcase">
+    <div class="showcase-inner">
+      <div class="showcase-window">
+        <div class="showcase-tabs">
+          <button class="showcase-tab active" data-tab="0">The Writing</button>
+          <button class="showcase-tab" data-tab="1">The Data</button>
+          <button class="showcase-tab" data-tab="2">The Process</button>
+        </div>
+        <div class="showcase-content">
+          <div class="showcase-image-container">
+            <img src="editor.png" alt="WriteBase Editor" class="showcase-image active" data-image="0">
+            <img src="airtable.png" alt="Airtable Database" class="showcase-image" data-image="1">
+            
+            <!-- Process visualization (inline) -->
+            <div class="showcase-image process-visual" data-image="2">
+              <div class="process-header">
+                <div class="process-intro">
+                  <h4>Your agents. Your rules.</h4>
+                  <p>Define your own AI agents — set the instructions, choose the model. OpenAI, Claude, Gemini, Llama, Grok, or whatever comes next. You control the logic. The pipeline adapts.</p>
+                  <div class="model-tags">
+                    <span>OpenAI</span>
+                    <span>Claude</span>
+                    <span>Gemini</span>
+                    <span>Llama</span>
+                    <span>Grok</span>
+                    <span class="more">+</span>
+                  </div>
+                  <p class="process-example">The example below is Thomas' writing process for his personal Substack.</p>
+                </div>
+              </div>
+              <div class="pipeline-mini">
+                <div class="pipeline-step human">
+                  <span class="step-num">01</span>
+                  <div class="step-content">
+                    <span class="step-label">BrainDump</span>
+                    <span class="step-desc">Raw ideas, fragments, what you want to write about.</span>
+                  </div>
+                  <span class="step-tag">You</span>
+                </div>
+                <div class="pipeline-step ai">
+                  <span class="step-num">02</span>
+                  <div class="step-content">
+                    <span class="step-label">Build</span>
+                    <span class="step-desc">AI creates outline and structure. Finds sources.</span>
+                  </div>
+                  <span class="step-tag">Agent</span>
+                </div>
+                <div class="pipeline-step ai">
+                  <span class="step-num">03</span>
+                  <div class="step-content">
+                    <span class="step-label">Rebuild</span>
+                    <span class="step-desc">Adjustments based on your feedback. Iterate.</span>
+                  </div>
+                  <span class="step-tag">Agent</span>
+                </div>
+                <div class="pipeline-step ai">
+                  <span class="step-num">04</span>
+                  <div class="step-content">
+                    <span class="step-label">Write</span>
+                    <span class="step-desc">AI produces full draft from approved structure.</span>
+                  </div>
+                  <span class="step-tag">Agent</span>
+                </div>
+                <div class="pipeline-step human">
+                  <span class="step-num">05</span>
+                  <div class="step-content">
+                    <span class="step-label">Edit</span>
+                    <span class="step-desc">Your voice, your changes. Make it yours.</span>
+                  </div>
+                  <span class="step-tag">You</span>
+                </div>
+                <div class="pipeline-step ai">
+                  <span class="step-num">06</span>
+                  <div class="step-content">
+                    <span class="step-label">Revise</span>
+                    <span class="step-desc">AI suggestions at 5 depth levels. Accept or reject.</span>
+                  </div>
+                  <span class="step-tag">Agent</span>
+                </div>
+              </div>
+              <div class="pipeline-footer">
+                <div class="pipeline-legend">
+                  <span class="legend-human">● Human</span>
+                  <span class="legend-ai">● AI Agent</span>
+                </div>
+                <div class="task-flow">
+                  <span class="task-flow-label">Task Flow — Always in Airtable</span>
+                  <div class="task-flow-steps">
+                    <span>idea</span>
+                    <span class="arrow">→</span>
+                    <span>structure</span>
+                    <span class="arrow">→</span>
+                    <span>draft</span>
+                    <span class="arrow">→</span>
+                    <span>edit</span>
+                    <span class="arrow">→</span>
+                    <span>publish</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-info">
+            <div>
+              <div class="showcase-label" data-label>Architectural View 01</div>
+              <h3 class="showcase-title" data-title>Focused Writing</h3>
+              <p class="showcase-subtitle" data-subtitle>A minimalist workspace for flow.</p>
+              <p class="showcase-desc" data-desc>
+                Experience a distraction-free writing environment that doesn't compromise on technical power. Markdown at its purest, mapped to your schema. Metadata, tags, and projects — all visible, all yours.
+              </p>
+            </div>
+            <div class="showcase-status">
+              System Ready — Airtable Connected
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy -->
+  <section class="philosophy" id="philosophy">
+    <div class="philosophy-inner">
+      <div class="philosophy-grid">
+        <div class="philosophy-item">
+          <div class="philosophy-icon">
+            <i data-lucide="pen-tool"></i>
+          </div>
+          <h3>Writing at Scale</h3>
+          <p>Whether you're building a wiki, a book, or a complex knowledge base, WriteBase provides the tools to handle the scale.</p>
+        </div>
+        <div class="philosophy-item">
+          <div class="philosophy-icon">
+            <i data-lucide="box"></i>
+          </div>
+          <h3>Structure as a Service</h3>
+          <p>AI tools are black boxes. We believe in transparency. Define your own agents and logic through your Airtable schema.</p>
+        </div>
+        <div class="philosophy-item">
+          <div class="philosophy-icon">
+            <i data-lucide="lock"></i>
+          </div>
+          <h3>Stop the Lock-in</h3>
+          <p>Most tools are either folder and document-driven or hide your data in proprietary silos. WriteBase is a window into your own data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quote -->
+  <section class="quote-section">
+    <div class="quote-inner">
+      <div class="quote-card">
+        <p class="quote-text">"I never saw my data before. Now I do."</p>
+        <p class="quote-body">
+          I tried every writing app. They all failed when the structure got complex. I built WriteBase because I wanted a beautiful pen that knew exactly where the ink was stored.
+        </p>
+        <div class="quote-author">
+          <div class="quote-author-icon">
+            <i data-lucide="pen-tool"></i>
+          </div>
+          <p class="quote-author-name">Thomas</p>
+          <p class="quote-author-title">Founder & Information Architect</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" id="cta">
+    <div class="cta-inner">
+      <img src="icon.png" alt="" class="cta-logo">
+      <h2 class="cta-title">Join the Gang of Eight.</h2>
+      <p class="cta-subtitle">
+        I'm seeking early testers who take writing and structure seriously. Reserved access for the first cohort.
+      </p>
+      
+      <a href="https://blog.writebase.app" class="btn btn-primary btn-large">
+        Join Waitlist
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+
+      <div class="cta-links">
+        <a href="https://blog.writebase.app">Blog</a>
+        <a href="https://doc.writebase.app">Documentation</a>
+        <a href="#">Privacy</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    WriteBase — Designed for the Architects of Thought © 2025
+  </footer>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Showcase tabs
+    const tabs = document.querySelectorAll('.showcase-tab');
+    const infoData = [
+      {
+        label: 'Architectural View 01',
+        title: 'Focused Writing',
+        subtitle: 'A minimalist workspace for flow.',
+        desc: 'Experience a distraction-free writing environment that doesn\'t compromise on technical power. Markdown at its purest, mapped to your schema. Metadata, tags, and projects — all visible, all yours.'
+      },
+      {
+        label: 'Architectural View 02',
+        title: 'Structural Integrity',
+        subtitle: 'Your content as an Airtable database.',
+        desc: 'Every document is a living record in your Airtable. Manage your entire library using the world\'s most flexible database engine. Query, filter, automate — your words become data you can work with.'
+      },
+      {
+        label: 'Architectural View 03',
+        title: 'AI-Powered Pipeline',
+        subtitle: 'From idea to publish in six stages (or whatever you need).',
+        desc: 'A structured writing process with AI agents at each step. You control the prompts, choose the models, and own the workflow. Human creativity meets machine scale — on your terms.'
+      }
+    ];
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const idx = parseInt(tab.dataset.tab);
+        
+        // Update tabs
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Update images (handles both img and div elements)
+        document.querySelectorAll('[data-image]').forEach(el => el.classList.remove('active'));
+        document.querySelector(`[data-image="${idx}"]`).classList.add('active');
+        
+        // Update info
+        const data = infoData[idx];
+        document.querySelector('[data-label]').textContent = data.label;
+        document.querySelector('[data-title]').textContent = data.title;
+        document.querySelector('[data-subtitle]').textContent = data.subtitle;
+        document.querySelector('[data-desc]').textContent = data.desc;
+      });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
